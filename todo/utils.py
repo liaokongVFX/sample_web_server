@@ -63,10 +63,10 @@ class Response(object):
         header = f'HTTP/1.1 {self.status} {self.response_msg_by_code.get(self.status, "")}\r\n'
 
         # 响应头部
-        header += ''.join(f'{k}: {v}' for k, v in self.headers.items())
+        header += ''.join(f'{k}: {v}\r\n' for k, v in self.headers.items())
 
         # 空行
-        blank_line = '\r\n\r\n'
+        blank_line = '\r\n'
 
         # 响应体
         body = self.body
