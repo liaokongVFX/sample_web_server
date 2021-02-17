@@ -16,7 +16,6 @@ def make_response(request, headers=None):
 
     # 获取匹配当前请求路径的处理函数和函数所接收的请求方法
     # request.path 等于 '/' 或 '/index' 时，routes.get(request.path) 将返回 (index, ['GET'])
-    print(request.path)
     route, methods = routes.get(request.path)
     if request.method not in methods:
         status = 405
