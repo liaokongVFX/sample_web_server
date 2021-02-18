@@ -8,10 +8,17 @@
 <h1 class="container">Todo List</h1>
 <div class="container">
     <ul>
+        <li>
+            <form class="new" action="/new" method="post">
+                <input type="text" name="content">
+                <button class="save">新建</button>
+            </form>
+        </li>
+        <br>
         {% for todo in todo_list %}
-            <li>
-                <div>{{ todo.content }}</div>
-            </li>
+        <li>
+            <div>{{ todo.content }}</div>
+        </li>
         {% endfor %}
     </ul>
 </div>

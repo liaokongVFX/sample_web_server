@@ -3,39 +3,74 @@
 # Author  : LiaoKong
 import os
 import re
+from urllib.parse import unquote_plus
 
 from todo.config import BASE_DIR
 
 
 class Request(object):
     def __init__(self, request_msg):
-        self.method, self.path, self.headers = self.parse_data(request_msg)
+        method, path, headers, args, form = self.parse_data(request_message)
+        self.method = method  # 请求方法 GET、POST
+        self.path = path  # 请求路径 /index
+        self.headers = headers  # 请求头 {'Host': '127.0.0.1:8000'}
+        self.args = args  # 查询参数
+        self.form = form  # 请求体
 
     def parse_data(self, request_msg):
         """解析请求报文"""
         header, body = request_msg.split('\r\n\r\n', 1)
-        method, path, headers = self._parse_header(header)
-        return method, path, headers
+        method, path, headers, args = self._parse_header(header)
+        form = self._path_body(body)
 
-    @staticmethod
-    def _parse_header(header_data):
+        return method, path, headers, args, form
+
+    def _parse_header(self, header_data):
         request_line, request_header = header_data.split('\r\n', 1)
 
-        #  request_line: 'GET /index HTTP/1.1'
-        method, path, _ = request_line.split()
+        # 请求行拆包 'GET /index HTTP/1.1' -> ['GET', '/index', 'HTTP/1.1']
+        method, path_query, _ = request_line.split()
+        path, args = self._parse_path(path_query)
 
         headers = {}
         for header in request_header.split('\r\n'):
             k, v = header.split(': ', 1)
             headers[k] = v
 
-        return method, path, headers
+        return method, path, headers, args
+
+    @staticmethod
+    def _parse_path(data):
+        """解析请求路径、请求参数"""
+        args = {}
+        # 请求路径和 GET 请求参数格式: /index?edit=1&content=text
+        if '?' not in data:
+            path, query = data, ''
+        else:
+            path, query = data.split('?', 1)
+            for q in query.split('&'):
+                k, v = q.split('=', 1)
+                args[k] = v
+        return path, args
+
+    @staticmethod
+    def _path_body(data):
+        """解析请求体"""
+        form = {}
+        if data:
+            # POST 请求体参数格式: username=zhangsan&password=mima
+            for b in data.split('&'):
+                k, v = b.split('=', 1)
+                # 前端页面中通过 form 表单提交过来的数据会被自动编码，使用 unquote_plus 来解码
+                form[k] = unquote_plus(v)
+        return form
 
 
 class Response(object):
     response_msg_by_code = {
         200: 'OK',
-        405: 'METHOD NOT ALLOWED'
+        302: 'FOUND',
+        405: 'METHOD NOT ALLOWED',
     }
 
     def __init__(self, body, headers=None, status=200):
@@ -171,3 +206,12 @@ def render_template(template_path, **context):
         t = Template(f.read(), context)
 
     return t.render()
+
+
+def redirect(url, status=302):
+    """重定向"""
+    headers = {
+        'Location': url,
+    }
+    body = ''
+    return Response(body, headers=headers, status=status)
