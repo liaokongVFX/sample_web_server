@@ -14,20 +14,30 @@ def make_response(request, headers=None):
     # 默认状态码为 200
     status = 200
 
-    # 获取匹配当前请求路径的处理函数和函数所接收的请求方法
-    # request.path 等于 '/' 或 '/index' 时，routes.get(request.path) 将返回 (index, ['GET'])
-    route, methods = routes.get(request.path)
+    # 处理静态资源请求
+    if request.path.startswith('/static'):
+        route, methods = routes.get('/static')
+    else:
+        # 获取匹配当前请求路径的处理函数和函数所接收的请求方法
+        # request.path 等于 '/' 或 '/index' 时，routes.get(request.path) 将返回 (index, ['GET'])
+        route, methods = routes.get(request.path)
+
     if request.method not in methods:
         status = 405
         data = 'Method Not Allowed'
     else:
-        data = route()
+        data = route(request)
 
-    # 获取响应报文
-    response = Response(data, headers=headers, status=status)
-    response_bytes = bytes(response)
+    # 如果返回结果为 Response 对象，直接获取响应报文
+    if isinstance(data, Response):
+        response_bytes = bytes(data)
+    else:
+        # 返回结果为字符串，需要先构造 Response 对象，然后再获取响应报文
+        response = Response(data, headers=headers, status=status)
+        print(response)
+        response_bytes = bytes(response)
+
     print(f'response_bytes: {response_bytes}')
-
     return response_bytes
 
 

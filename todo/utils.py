@@ -64,8 +64,11 @@ class Response(object):
         # 响应体
         body = self.body
 
-        response_msg = header + blank_line + body
-        return response_msg.encode('utf-8')
+        # body 支持 str 或 bytes 类型
+        if isinstance(body, str):
+            body = body.encode('utf-8')
+        response_msg = (header + blank_line).encode('utf-8') + body
+        return response_msg
 
 
 class Template(object):
