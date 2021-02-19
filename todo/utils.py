@@ -10,7 +10,7 @@ from todo.config import BASE_DIR
 
 class Request(object):
     def __init__(self, request_msg):
-        method, path, headers, args, form = self.parse_data(request_message)
+        method, path, headers, args, form = self.parse_data(request_msg)
         self.method = method  # 请求方法 GET、POST
         self.path = path  # 请求路径 /index
         self.headers = headers  # 请求头 {'Host': '127.0.0.1:8000'}

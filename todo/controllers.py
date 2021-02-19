@@ -4,7 +4,7 @@
 import os
 
 from todo.config import BASE_DIR
-from todo.utils import render_template, Response
+from todo.utils import render_template, Response, redirect
 from todo.models import TodoModel
 
 
@@ -57,10 +57,24 @@ def favicon(request):
     return Response(body, headers=headers)
 
 
+def new(request):
+    """新建 todo 视图函数"""
+    form = request.form
+    print(f'form: {form}')
+
+    content = form.get('content')
+    # 这里判断前端传递过来的参数是否有内容，如果为空则说明不是一个有效的 todo，直接重定向到首页
+    if content:
+        todo = TodoModel(content=content)
+        todo.save()
+    return redirect('/index')
+
+
 # 注册路由
 routes = {
     '/': (index, ['GET']),
     '/index': (index, ['GET']),
+    '/new': (new, ['POST']),
     '/static': (static, ['GET']),
     '/favicon.ico': (favicon, ['GET']),
 }
