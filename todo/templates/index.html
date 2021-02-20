@@ -18,6 +18,15 @@
         {% for todo in todo_list %}
         <li>
             <div>{{ todo.content }}</div>
+            <div>
+                <a href="/edit?id={{ todo.id }}">
+                    <button>编辑</button>
+                </a>
+                <form class="delete" action="/delete" method="post">
+                    <input type="hidden" name="id" value="{{ todo.id }}">
+                    <button>删除</button>
+                </form>
+            </div>
         </li>
         {% endfor %}
     </ul>

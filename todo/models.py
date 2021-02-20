@@ -55,3 +55,36 @@ class TodoModel(object):
         # 将所有 todo 保存到文件
         self._save_db(todo_list)
 
+    @classmethod
+    def find_by(cls, limit=-1, ensure_one=False, sort=False, reverse=False, **kwargs):
+        """查询 todo"""
+        result = []
+        todo_list = [todo.__dict__ for todo in cls.all(sort=sort, reverse=reverse)]
+        for todo in todo_list:
+            # 根据关键字参数查询 todo
+            for k, v in kwargs.items():
+                if todo.get(k) != v:
+                    break
+            else:
+                result.append(cls(**todo))
+
+        # 查询给定条数的数据
+        if 0 < limit < len(result):
+            result = result[:limit]
+        # 查询结果集中的第一条数据
+        if ensure_one:
+            result = result[0] if len(result) > 0 else None
+
+        return result
+
+    @classmethod
+    def get(cls, id):
+        """通过 id 查询 todo"""
+        result = cls.find_by(id=id, ensure_one=True)
+        return result
+
+    def delete(self):
+        """删除 todo"""
+        todo_list = [todo.__dict__ for todo in self.all() if todo.id != self.id]
+        self._save_db(todo_list)
+

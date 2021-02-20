@@ -70,6 +70,56 @@ def new(request):
     return redirect('/index')
 
 
+# todo_list/todo/controllers.py
+
+def edit(request):
+    """编辑 todo 视图函数"""
+    # 处理 POST 请求
+    if request.method == 'POST':
+        form = request.form
+        print(f'form: {form}')
+
+        id = int(form.get('id', -1))
+        content = form.get('content')
+
+        if id != -1 and content:
+            todo = TodoModel.get(id)
+            if todo:
+                todo.content = content
+                todo.save()
+        return redirect('/index')
+
+    # 处理 GET 请求
+    args = request.args
+    print(f'args: {args}')
+
+    id = int(args.get('id', -1))
+    if id == -1:
+        return redirect('/index')
+
+    todo = TodoModel.get(id)
+    if not todo:
+        return redirect('/index')
+
+    context = {
+        'todo': todo,
+    }
+    return render_template('edit.html', **context)
+
+
+def delete(request):
+    """删除 todo 视图函数"""
+    form = request.form
+    print(f'form: {form}')
+
+    id = int(form.get('id', -1))
+    if id != -1:
+        todo = TodoModel.get(id)
+        if todo:
+            todo.delete()
+    return redirect('/index')
+
+
 # 注册路由
 routes = {
     '/': (index, ['GET']),
@@ -77,4 +127,6 @@ routes = {
     '/new': (new, ['POST']),
     '/static': (static, ['GET']),
     '/favicon.ico': (favicon, ['GET']),
+    '/edit': (edit, ['GET', 'POST']),
+    '/delete': (delete, ['POST']),
 }
