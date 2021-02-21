@@ -5,6 +5,7 @@
 from todo.utils.http import redirect
 from todo.utils.templating import render_template
 from todo.models.todo import TodoModel
+from todo.utils.logging import logger
 
 
 def index(request):
@@ -21,7 +22,7 @@ def index(request):
 def new(request):
     """新建 todo 视图函数"""
     form = request.form
-    print(f'form: {form}')
+    logger(f'form: {form}')
 
     content = form.get('content')
     # 这里判断前端传递过来的参数是否有内容，如果为空则说明不是一个有效的 todo，直接重定向到首页
@@ -36,7 +37,7 @@ def edit(request):
     # 处理 POST 请求
     if request.method == 'POST':
         form = request.form
-        print(f'form: {form}')
+        logger(f'form: {form}')
 
         id = int(form.get('id', -1))
         content = form.get('content')
@@ -50,7 +51,7 @@ def edit(request):
 
     # 处理 GET 请求
     args = request.args
-    print(f'args: {args}')
+    logger(f'args: {args}')
 
     id = int(args.get('id', -1))
     if id == -1:
@@ -69,7 +70,7 @@ def edit(request):
 def delete(request):
     """删除 todo 视图函数"""
     form = request.form
-    print(f'form: {form}')
+    logger(f'form: {form}')
 
     id = int(form.get('id', -1))
     if id != -1:

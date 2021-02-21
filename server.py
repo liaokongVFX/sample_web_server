@@ -7,6 +7,7 @@ import threading
 from todo.config import HOST, POST, BUFFER_SIZE
 from todo.utils.http import Request, Response
 from todo.controllers import routes
+from todo.utils.logging import logger
 
 
 def make_response(request, headers=None):
@@ -36,7 +37,7 @@ def make_response(request, headers=None):
         response = Response(data, headers=headers, status=status)
         response_bytes = bytes(response)
 
-    print(f'response_bytes: {response_bytes}')
+    logger(f'response_bytes: {response_bytes}')
     return response_bytes
 
 
@@ -51,7 +52,7 @@ def process_connection(client):
 
     # 请求报文
     request_msg = request_bytes.decode('utf-8')
-    print(f'request_message: {request_msg}')
+    logger(f'request_message: {request_msg}')
 
     # 解析请求
     request = Request(request_msg)
@@ -69,11 +70,11 @@ def main():
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, POST))
         s.listen(5)
-        print(f'running on http://{HOST}:{POST}')
+        logger(f'running on http://{HOST}:{POST}')
 
         while 1:
             client, address = s.accept()
-            print(f'client address: {address}')
+            logger(f'client address: {address}')
 
             # 创建一条子线程去处理客户端请求
             t = threading.Thread(target=process_connection, args=(client,))
