@@ -5,7 +5,7 @@ import socket
 import threading
 
 from todo.config import HOST, POST, BUFFER_SIZE
-from todo.utils import Request, Response
+from todo.utils.http import Request, Response
 from todo.controllers import routes
 
 
@@ -34,7 +34,6 @@ def make_response(request, headers=None):
     else:
         # 返回结果为字符串，需要先构造 Response 对象，然后再获取响应报文
         response = Response(data, headers=headers, status=status)
-        print(response)
         response_bytes = bytes(response)
 
     print(f'response_bytes: {response_bytes}')
