@@ -1,14 +1,7 @@
 [
     {
         "id": 1,
-        "content": "hello world"
-    },
-    {
-        "id": 2,
-        "content": "你好，世界！"
-    },
-    {
-        "id": 4,
+        "user_id": 1,
         "content": "666"
     }
 ]

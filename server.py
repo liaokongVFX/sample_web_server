@@ -8,6 +8,7 @@ from todo.config import HOST, POST, BUFFER_SIZE
 from todo.utils.http import Request, Response
 from todo.controllers import routes
 from todo.utils.logging import logger
+from todo.utils.error import errors
 
 
 def make_response(request, headers=None):
@@ -19,9 +20,13 @@ def make_response(request, headers=None):
     if request.path.startswith('/static'):
         route, methods = routes.get('/static')
     else:
-        # 获取匹配当前请求路径的处理函数和函数所接收的请求方法
-        # request.path 等于 '/' 或 '/index' 时，routes.get(request.path) 将返回 (index, ['GET'])
-        route, methods = routes.get(request.path)
+        try:
+            # 获取匹配当前请求路径的处理函数和函数所接收的请求方法
+            # request.path 等于 '/' 或 '/index' 时，routes.get(request.path) 将返回 (index, ['GET'])
+            route, methods = routes.get(request.path)
+        except TypeError:
+            # 返回给用户 404 页面
+            return bytes(errors[404]())
 
     if request.method not in methods:
         status = 405
@@ -56,8 +61,15 @@ def process_connection(client):
 
     # 解析请求
     request = Request(request_msg)
-    # 根据请求对象构造响应报文
-    response_bytes = make_response(request)
+    try:
+        # 根据请求报文构造响应报文
+        response_bytes = make_response(request)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger(e)
+        # 返回给用户 500 页面
+        response_bytes = bytes(errors[500]())
     # 返回响应
     client.sendall(response_bytes)
 

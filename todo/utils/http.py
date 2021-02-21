@@ -6,20 +6,21 @@ from urllib.parse import unquote_plus
 
 class Request(object):
     def __init__(self, request_msg):
-        method, path, headers, args, form = self.parse_data(request_msg)
+        method, path, headers, args, cookies, form = self.parse_data(request_msg)
         self.method = method  # 请求方法 GET、POST
         self.path = path  # 请求路径 /index
         self.headers = headers  # 请求头 {'Host': '127.0.0.1:8000'}
         self.args = args  # 查询参数
+        self.cookies = cookies  # Cookie
         self.form = form  # 请求体
 
     def parse_data(self, request_msg):
         """解析请求报文"""
         header, body = request_msg.split('\r\n\r\n', 1)
-        method, path, headers, args = self._parse_header(header)
+        method, path, headers, args, cookies = self._parse_header(header)
         form = self._path_body(body)
 
-        return method, path, headers, args, form
+        return method, path, headers, args, cookies, form
 
     def _parse_header(self, header_data):
         request_line, request_header = header_data.split('\r\n', 1)
@@ -33,7 +34,25 @@ class Request(object):
             k, v = header.split(': ', 1)
             headers[k] = v
 
-        return method, path, headers, args
+        cookies = self._parse_cookies(headers)
+        return method, path, headers, args, cookies
+
+    @staticmethod
+    def _parse_cookies(headers):
+        """解析 Cookie
+        Args:
+            headers: 请求头数据
+        Returns:
+            cookies: 所有 Cookie 组成的字典
+        """
+        cookies = {}
+        for key, value in headers.items():
+            if key.lower() == 'cookie':
+                for cookie in value.split('; '):
+                    if '=' in cookie:
+                        k, v = cookie.split('=', 1)
+                        cookies[k] = v
+        return cookies
 
     @staticmethod
     def _parse_path(data):
@@ -69,7 +88,7 @@ class Response(object):
         405: 'METHOD NOT ALLOWED',
     }
 
-    def __init__(self, body, headers=None, status=200):
+    def __init__(self, body, headers=None, status=200, cookies=None):
         # 默认响应首部字段，指定响应内容的类型为 HTML
         _headers = {
             'Content-Type': 'text/html; charset=utf-8',
@@ -80,6 +99,7 @@ class Response(object):
         self.headers = _headers
         self.body = body
         self.status = status
+        self.cookies = cookies  # Cookie
 
     def __bytes__(self):
         """构造响应报文"""
@@ -88,6 +108,10 @@ class Response(object):
 
         # 响应头部
         header += ''.join(f'{k}: {v}\r\n' for k, v in self.headers.items())
+
+        # Cookie
+        if self.cookies:
+            header += 'Set-Cookie: ' + '; '.join(f'{k}={v}' for k, v in self.cookies.items())
 
         # 空行
         blank_line = '\r\n'
@@ -102,10 +126,10 @@ class Response(object):
         return response_msg
 
 
-def redirect(url, status=302):
+def redirect(url, status=302, cookies=None):
     """重定向"""
     headers = {
         'Location': url,
     }
     body = ''
-    return Response(body, headers=headers, status=status)
+    return Response(body, headers=headers, status=status, cookies=cookies)

@@ -76,3 +76,37 @@ form input {
 .delete {
     display: inline-block;
 }
+
+.register {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.register input {
+    width: 100%;
+    height: 40px;
+    padding: 0 4px;
+}
+
+.register button {
+    margin-top: 20px;
+}
+
+/* todo_list/todo/static/css/style.css */
+
+.login {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.login input {
+    width: 100%;
+    height: 40px;
+    padding: 0 4px;
+}
+
+.login button {
+    margin-top: 20px;
+}

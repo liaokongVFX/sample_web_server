@@ -3,6 +3,7 @@
 # Author  : LiaoKong
 from .static import static, favicon
 from .todo import index, new, delete, edit
+from .auth import login, register
 
 # 注册路由
 routes = {
@@ -13,4 +14,6 @@ routes = {
     '/favicon.ico': (favicon, ['GET']),
     '/edit': (edit, ['GET', 'POST']),
     '/delete': (delete, ['POST']),
+    '/login': (login, ['GET', 'POST']),
+    '/register': (register, ['GET', 'POST'])
 }

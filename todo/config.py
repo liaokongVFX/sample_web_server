@@ -9,3 +9,5 @@ HOST = '127.0.0.1'
 POST = 8000
 
 BUFFER_SIZE = 1024
+
+SECRET = '5645645rhfgfth'
